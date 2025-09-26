@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>メール送信疑似体験</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; background: #fafafa; }
+    h1 { font-size: 18px; margin-bottom: 10px; }
+    label { display:block; margin-top:10px; font-size:14px; }
+    input, textarea { width:100%; padding:6px; margin-top:4px; box-sizing:border-box; }
+    textarea { min-height:120px; resize:none; overflow:hidden; }
+    button { margin-top:10px; margin-right:6px; padding:6px 12px; }
+    .count { font-size: 12px; color: #666; float: right; }
+  </style>
+</head>
+<body>
+  <h1>メール作成（疑似体験）</h1>
+  <form id="mailForm">
+    <label for="to">宛先</label>
+    <input id="to" type="email" placeholder="example@domain.com" required>
+
+    <label for="subject">件名</label>
+    <input id="subject" type="text" placeholder="件名を入力">
+
+    <label for="body">本文 <span id="charCount" class="count">0 文字</span></label>
+    <textarea id="body" rows="25" placeholder="ここに本文を入力..."></textarea>
+
+    <div>
+      <button type="submit">送信</button>
+      <button type="button" id="clearBtn">クリア</button>
+      <button type="button" id="saveBtn">保存</button>
+      <button type="button" id="loadBtn">読み込み</button>
+    </div>
+  </form>
+
+  <script>
+  (function(){
+    const $ = id => document.getElementById(id);
+    const to = $('to'), subject = $('subject'), body = $('body'), charCount = $('charCount');
+    const STORAGE_KEY = "mailFormData";
+
+    // 文字数カウント & 自動伸縮
+    function autoResize(){
+      body.style.height = 'auto';
+      body.style.height = body.scrollHeight + 'px';
+      charCount.textContent = body.value.length + ' 文字';
+    }
+
+    body.addEventListener('input', autoResize);
+    window.addEventListener('DOMContentLoaded', autoResize);
+
+    // 疑似送信
+    $('mailForm').addEventListener('submit', e => {
+      e.preventDefault();
+      alert('疑似送信しました\\n\\n宛先: ' + to.value + '\\n件名: ' + subject.value + '\\n本文:\\n' + body.value);
+      to.value = subject.value = body.value = '';
+      autoResize();
+    });
+
+    // クリア
+    $('clearBtn').addEventListener('click', () => {
+      to.value=''; subject.value=''; body.value=''; autoResize();
+    });
+
+    // 保存
+    $('saveBtn').addEventListener('click', () => {
+      const data = {to: to.value, subject: subject.value, body: body.value};
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      alert('入力内容を保存しました');
+    });
+
+    // 読み込み
+    $('loadBtn').addEventListener('click', () => {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+      if(data){
+        to.value = data.to || '';
+        subject.value = data.subject || '';
+        body.value = data.body || '';
+        autoResize();
+        alert('保存した内容を読み込みました');
+      } else {
+        alert('保存されたデータがありません');
+      }
+    });
+  })();
+  </script>
+</body>
+</html>
